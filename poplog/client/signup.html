@@ -1,0 +1,43 @@
+<!-- signup.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サインアップ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>サインアップ</h1>
+        <form id="signup-form">
+            <input type="text" id="signup-username" placeholder="ユーザー名" required>
+            <input type="password" id="signup-password" placeholder="パスワード" required>
+            <button type="submit">サインアップ</button>
+        </form>
+    </div>
+
+    <script>
+        const signupForm = document.getElementById('signup-form');
+
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+
+            const response = await fetch('http://localhost:3000/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+                alert('サインアップ成功');
+                window.location.href = 'signin.html';
+            } else {
+                alert('サインアップ失敗');
+            }
+        });
+    </script>
+</body>
+</html>

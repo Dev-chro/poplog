@@ -1,0 +1,106 @@
+<!-- items.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>項目一覧</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>項目リスト</h1>
+        <input type="text" id="filter-box" placeholder="項目名でフィルタ...">
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>分類番号</th>
+                    <th>項目名</th>
+                    <th>エイリアス</th>
+                    <th>入力値</th>
+                    <th>最終更新日</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- データがここに表示されます -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const filterBox = document.getElementById('filter-box');
+        const dataTableBody = document.getElementById('data-table').querySelector('tbody');
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('サインインが必要です');
+            window.location.href = 'signin.html';
+        }
+
+        filterBox.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const rows = dataTableBody.querySelectorAll('tr');
+
+            rows.forEach(function(row) {
+                const itemName = row.querySelector('.item-name').textContent.toLowerCase();
+                if (itemName.includes(query)) {
+                    row.classList.remove('hidden');
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+        });
+
+        async function fetchItems() {
+            const response = await fetch('http://localhost:3000/items', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            if (response.ok) {
+                const items = await response.json();
+                dataTableBody.innerHTML = '';
+
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="classification-number">${item.classificationNumber}</td>
+                        <td class="item-name">${item.itemName}</td>
+                        <td class="alias">${item.alias}</td>
+                        <td data-label="入力値"><input type="number" class="input-box" data-last-value="${item.value}" value="${item.value}"></td>
+                        <td class="last-updated">${item.lastUpdated || '-'}</td>
+                    `;
+                    dataTableBody.appendChild(row);
+                });
+
+                document.querySelectorAll('.input-box').forEach(function(input) {
+                    input.addEventListener('input', async function() {
+                        const newValue = parseFloat(this.value);
+                        const lastValue = parseFloat(this.getAttribute('data-last-value')) || Infinity;
+                        const lastUpdatedCell = this.closest('tr').querySelector('.last-updated');
+                        const classificationNumber = this.closest('tr').querySelector('.classification-number').textContent;
+
+                        if (newValue < lastValue) {
+                            this.setAttribute('data-last-value', newValue);
+                            const now = new Date();
+                            lastUpdatedCell.textContent = now.toLocaleString();
+
+                            await fetch(`http://localhost:3000/items/${classificationNumber}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                },
+                                body: JSON.stringify({ value: newValue, lastUpdated: now.toISOString() }),
+                            });
+                        }
+                    });
+                });
+            } else {
+                alert('データ取得失敗');
+            }
+        }
+
+        fetchItems();
+    </script>
+</body>
+</html>

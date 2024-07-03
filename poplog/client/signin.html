@@ -1,0 +1,45 @@
+<!-- signin.html -->
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サインイン</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>サインイン</h1>
+        <form id="signin-form">
+            <input type="text" id="signin-username" placeholder="ユーザー名" required>
+            <input type="password" id="signin-password" placeholder="パスワード" required>
+            <button type="submit">サインイン</button>
+        </form>
+    </div>
+
+    <script>
+        const signinForm = document.getElementById('signin-form');
+
+        signinForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const username = document.getElementById('signin-username').value;
+            const password = document.getElementById('signin-password').value;
+
+            const response = await fetch('http://localhost:3000/signin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.token);
+                alert('サインイン成功');
+                window.location.href = 'items.html';
+            } else {
+                alert('サインイン失敗');
+            }
+        });
+    </script>
+</body>
+</html>
