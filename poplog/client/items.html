@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- ページの文字コードと表示設定、タイトル、スタイルシートのリンクを指定 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>項目一覧</title>
@@ -10,15 +11,19 @@
 <body>
     <div class="container">
         <h1>項目リスト</h1>
+        <!-- 項目名でフィルタするための入力ボックス -->
         <input type="text" id="filter-box" placeholder="項目名でフィルタ...">
         <table id="data-table">
             <thead>
+                <!-- テーブルのヘッダー部分 -->
                 <tr>
-                    <th>分類番号</th>
-                    <th>項目名</th>
-                    <th>エイリアス</th>
-                    <th>入力値</th>
-                    <th>最終更新日</th>
+                    <th>Lv</th>
+                    <th>ジャンル名</th>
+                    <th>曲名</th>
+                    <th>正規最小数</th>
+                    <th>ミラー最小数</th>
+                    <th>正規最終更新日</th>
+                    <th>ミラー最終更新日</th>
                 </tr>
             </thead>
             <tbody>
@@ -28,19 +33,25 @@
     </div>
 
     <script>
+        // フィルタ入力ボックスとテーブルのtbodyを取得
         const filterBox = document.getElementById('filter-box');
         const dataTableBody = document.getElementById('data-table').querySelector('tbody');
+        
+        // ローカルストレージからトークンを取得
         const token = localStorage.getItem('token');
 
+        // トークンが存在しない場合、サインインページにリダイレクト
         if (!token) {
             alert('サインインが必要です');
             window.location.href = 'signin.html';
         }
 
+        // フィルタ入力ボックスに入力があるたびに呼び出されるイベントリスナー
         filterBox.addEventListener('input', function() {
             const query = this.value.toLowerCase();
             const rows = dataTableBody.querySelectorAll('tr');
 
+            // テーブルの各行をループし、フィルタ条件に合致するかチェック
             rows.forEach(function(row) {
                 const itemName = row.querySelector('.item-name').textContent.toLowerCase();
                 if (itemName.includes(query)) {
@@ -51,6 +62,7 @@
             });
         });
 
+        // サーバから項目データを取得し、テーブルに表示する関数
         async function fetchItems() {
             const response = await fetch('http://localhost:3000/items', {
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -60,6 +72,7 @@
                 const items = await response.json();
                 dataTableBody.innerHTML = '';
 
+                // 取得した項目データをテーブルに追加
                 items.forEach(item => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -72,6 +85,7 @@
                     dataTableBody.appendChild(row);
                 });
 
+                // 各入力ボックスにイベントリスナーを追加
                 document.querySelectorAll('.input-box').forEach(function(input) {
                     input.addEventListener('input', async function() {
                         const newValue = parseFloat(this.value);
@@ -79,6 +93,7 @@
                         const lastUpdatedCell = this.closest('tr').querySelector('.last-updated');
                         const classificationNumber = this.closest('tr').querySelector('.classification-number').textContent;
 
+                        // 新しい値が前の値より小さい場合、データを更新
                         if (newValue < lastValue) {
                             this.setAttribute('data-last-value', newValue);
                             const now = new Date();
@@ -100,6 +115,7 @@
             }
         }
 
+        // ページ読み込み時にデータを取得して表示
         fetchItems();
     </script>
 </body>

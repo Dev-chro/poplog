@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- ページの文字コードと表示設定、タイトル、スタイルシートのリンクを指定 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>サインイン</title>
@@ -10,31 +11,41 @@
 <body>
     <div class="container">
         <h1>サインイン</h1>
+        <!-- サインインフォームの作成 -->
         <form id="signin-form">
+            <!-- ユーザー名の入力フィールド -->
             <input type="text" id="signin-username" placeholder="ユーザー名" required>
+            <!-- パスワードの入力フィールド -->
             <input type="password" id="signin-password" placeholder="パスワード" required>
+            <!-- サインインボタン -->
             <button type="submit">サインイン</button>
         </form>
     </div>
 
     <script>
+        // サインインフォームの取得
         const signinForm = document.getElementById('signin-form');
 
+        // サインインフォームが送信されたときのイベントリスナー
         signinForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+            event.preventDefault(); // フォームのデフォルト送信を防止
             const username = document.getElementById('signin-username').value;
             const password = document.getElementById('signin-password').value;
 
+            // サインインのリクエストをサーバに送信
             const response = await fetch('http://localhost:3000/signin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
 
+            // レスポンスが成功の場合
             if (response.ok) {
                 const data = await response.json();
+                // トークンをローカルストレージに保存
                 localStorage.setItem('token', data.token);
                 alert('サインイン成功');
+                // サインイン成功後、項目一覧ページにリダイレクト
                 window.location.href = 'items.html';
             } else {
                 alert('サインイン失敗');

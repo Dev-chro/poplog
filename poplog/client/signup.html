@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <!-- ページの文字コードと表示設定、タイトル、スタイルシートのリンクを指定 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>サインアップ</title>
@@ -10,29 +11,38 @@
 <body>
     <div class="container">
         <h1>サインアップ</h1>
+        <!-- サインアップフォームの作成 -->
         <form id="signup-form">
+            <!-- ユーザー名の入力フィールド -->
             <input type="text" id="signup-username" placeholder="ユーザー名" required>
+            <!-- パスワードの入力フィールド -->
             <input type="password" id="signup-password" placeholder="パスワード" required>
+            <!-- サインアップボタン -->
             <button type="submit">サインアップ</button>
         </form>
     </div>
 
     <script>
+        // サインアップフォームの取得
         const signupForm = document.getElementById('signup-form');
 
+        // サインアップフォームが送信されたときのイベントリスナー
         signupForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+            event.preventDefault(); // フォームのデフォルト送信を防止
             const username = document.getElementById('signup-username').value;
             const password = document.getElementById('signup-password').value;
 
+            // サインアップのリクエストをサーバに送信
             const response = await fetch('http://localhost:3000/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),
             });
 
+            // レスポンスが成功の場合
             if (response.ok) {
                 alert('サインアップ成功');
+                // サインアップ成功後、サインインページにリダイレクト
                 window.location.href = 'signin.html';
             } else {
                 alert('サインアップ失敗');
